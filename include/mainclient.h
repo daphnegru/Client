@@ -14,6 +14,7 @@ public:
     mainclient();
     vector<string> splitlinefromserver(string line);
     vector<string> splitline(string line);
+    vector<string> splitCommand(string line);
 };
 
 

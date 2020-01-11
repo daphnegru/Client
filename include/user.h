@@ -16,6 +16,7 @@ using namespace std;
 class user {
 public:
     user(string userName, string password);
+    ~user();
     void addbook(string book,string genre);
     void deletebook(string book, string genre);
     void subscribe(string genre, int id);
@@ -29,12 +30,12 @@ public:
     int getsubid();
     void returnedBook(string book,string genre);
     string booksByGenre(string genre);
+    string getId(string genre);
 
 private:
     map<string,vector<Book*>> books;
     string userName;
     string password;
-//    bool login;
     map<string,int> genresByid;
     int subid;
 

@@ -15,6 +15,7 @@ public:
     vector<string> splitlines(string line);
     vector<string> splittowords(string line);
     readsocket(ConnectionHandler &connectionHandler,user u);
+    bool findDots(string line);
 
 
 private:

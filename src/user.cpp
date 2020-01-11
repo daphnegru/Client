@@ -15,9 +15,7 @@ using namespace std;
 user::user(string name, string pass): userName(name),password(pass) {
     map<string,vector<Book*>> books;
     map<string,int> genresByid;
-    //TODO check if correct
     subid=0;
-//    login = true;
 
 }
 
@@ -76,8 +74,6 @@ void user::unsubscribe(string genre) {
     if (genresByid.find(genre)!=genresByid.end()){
         genresByid.erase(genresByid.find(genre));
     }
-    //TODO check if correct
-//    login=false;
 }
 
 
@@ -130,6 +126,14 @@ int user::getsubid(){
     return subid;
 }
 
+string user::getId(string genre){
+    if (genresByid.find(genre)!=genresByid.end()){
+        string id = to_string(genresByid.find(genre)->second);
+        return id;
+    }
+    return nullptr;
+}
+
 void user::returnedBook(string book,string genre){
     bool found = false;
     for (int i = 0; i<books.find(genre)->second.size() && !found; i++){
@@ -142,9 +146,24 @@ void user::returnedBook(string book,string genre){
 
 string user::booksByGenre(string genre) {
     string s ="";
+    s=s+userName;
+    s=s+":";
     for (int i = 0; i<getBooksByGenre(genre).size();i++){
         s=s+getBooksByGenre(genre).at(i)->getName()+",";
     }
-    s.substr(0,s.find_last_of(','));
+    int last = s.find_last_of(',');
+    s=s.substr(0,last);
     return s;
 }
+
+user::~user(){
+    for (pair<string, vector<Book*>> p: books){
+        for (int i = 0; i<p.second.size();i++){
+            delete p.second.at(i);
+        }
+        p.second.clear();
+    }
+    books.clear();
+    genresByid.clear();
+}
+
