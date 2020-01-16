@@ -12,15 +12,15 @@ using namespace std;
 class readsocket {
 public:
     void run();
-    vector<string> splitlines(string line);
-    vector<string> splittowords(string line);
-    readsocket(ConnectionHandler &connectionHandler,user u);
+    vector<string> splitlines(string line, vector<string> &linesplit);
+    vector<string> splittowords(string line, vector<string> &linesplit);
+    readsocket(ConnectionHandler &connectionHandler,user &u);
     bool findDots(string line);
 
 
 private:
     ConnectionHandler &handle;
-    user u;
+    user &u;
 };
 
 

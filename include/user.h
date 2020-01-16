@@ -9,6 +9,7 @@
 #include <list>
 #include <map>
 #include <vector>
+#include <mutex>
 #include "Book.h"
 
 using namespace std;
@@ -26,18 +27,39 @@ public:
     string getName();
     string getBorrowedFrom(string book, string genre);
     bool getbook(string name, string genre);
-    void borrowbookToSomeone(string book, string genre);
     int getsubid();
     void returnedBook(string book,string genre);
     string booksByGenre(string genre);
     string getId(string genre);
+    string getAnswer(int id);
+    void addReceipt(int id,string action,string genre);
+    void logOut();
+    void addToWishList(string book);
+    bool inWishList(string book);
+    void removeFromWishList(string book);
+    void changeStatus(string book, string genre);
+    void changeBorrowedFrom(string book,string genre, string name);
+    bool hasBookInInventory(string book, string genre);
+    int numOfBooksTaken(string genre);
+    vector<pair<string,int>> getGenres();
+
 
 private:
-    map<string,vector<Book*>> books;
     string userName;
     string password;
+    map<string,vector<Book*>> books;
     map<string,int> genresByid;
     int subid;
+    map<int,string>receipt;
+    vector<string> wishlist;
+    std::mutex books_lock;
+    std::mutex genre_lock;
+    std::mutex rec_lock;
+    std::mutex wish_lock;
+    std::mutex ids_lock;
+    vector<pair<string,int>> ids;
+
+
 
 
 };

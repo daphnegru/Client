@@ -1,5 +1,6 @@
 #include <connectionHandler.h>
- 
+#include <mutex>
+
 using boost::asio::ip::tcp;
 
 using std::cin;
@@ -8,7 +9,8 @@ using std::cerr;
 using std::endl;
 using std::string;
  
-ConnectionHandler::ConnectionHandler(string host, short port): host_(host), port_(port), io_service_(), socket_(io_service_){}
+ConnectionHandler::ConnectionHandler(string host, short port): host_(host), port_(port), io_service_(), socket_(io_service_), send_lock(){
+}
     
 ConnectionHandler::~ConnectionHandler() {
     close();
@@ -69,6 +71,7 @@ bool ConnectionHandler::getLine(std::string& line) {
 }
 
 bool ConnectionHandler::sendLine(std::string& line) {
+    std::lock_guard<std::mutex> lock(send_lock);
     return sendFrameAscii(line, '\0');
 }
  

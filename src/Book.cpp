@@ -7,9 +7,8 @@
 
 using namespace std;
 
-Book::Book(string _name, string _genre): name(_name), genre(_genre) {
-    borrowedFrom;
-    haveBook=true;
+Book::Book(string _name, string _genre): name(_name), genre(_genre),borrowedFrom(""), haveBook(true) {
+
 }
 
 

@@ -7,14 +7,21 @@
 
 #include <string>
 #include <vector>
+#include <mutex>
+
 using namespace std;
 
 class mainclient {
+
 public:
+    ~mainclient();
     mainclient();
     vector<string> splitlinefromserver(string line);
-    vector<string> splitline(string line);
-    vector<string> splitCommand(string line);
+    vector<string> splitline(string line,vector<string> &linesplit);
+    vector<string> splitCommand(string line,vector<string> &linesplit);
+
+
+
 };
 
 

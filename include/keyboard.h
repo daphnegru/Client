@@ -8,19 +8,23 @@
 #include "connectionHandler.h"
 #include <vector>
 #include <string>
+#include <mutex>
 #include "user.h"
 
 using namespace std;
 
 class keyboard{
 public:
-    keyboard(ConnectionHandler &handler, user u);
+    keyboard(ConnectionHandler &handler, user &u);
     void run();
-    vector<string> splitline(string line);
+    vector<string> splitline(string line, vector<string> &linesplit);
 
 private:
     ConnectionHandler &handle;
-    user u;
+    user &u;
+    int id;
+
+
 };
 
 

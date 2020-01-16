@@ -8,96 +8,106 @@
 
 using namespace std;
 
-keyboard::keyboard(ConnectionHandler &_handler,user use) : handle(_handler),u(use) {}
+keyboard::keyboard(ConnectionHandler &_handler, user &use) : handle(_handler), u(use), id(0) {
+
+}
 
 
 void keyboard::run() {
-//    string str = "";
-//    getline(cin, str);
-//    vector<string> split = splitline(str);
-    int recjoin=1;
-    int reclogout=2;
     bool login = true;
     while (login) {
         string str = "";
         getline(cin, str);
-        vector<string> split = splitline(str);
+        vector<string> split;
+        split = splitline(str, split);
         if (split.at(0) == "join") {
-            string sub= to_string(u.getsubid());
-            string message=string("SUBSCRIBE")+'\n'+string("destination:")+split.at(1)+'\n'+string("id:")+sub+'\n'+string("receipt:")+to_string(recjoin)+'\n'+'\0';
-            recjoin=recjoin+2;
-            u.subscribe(split.at(1),stoi(sub));
+            string sub = to_string(u.getsubid());
+            id++;
+            string message =
+                    string("SUBSCRIBE") + '\n' + string("destination:") + split.at(1) + '\n' + string("id:") + sub +
+                    '\n' + string("receipt:") + to_string(id) + '\n' + '\n';
+            u.addReceipt(id, "join", split.at(1));
             handle.sendLine(message);
-            string str="Joined club "+split.at(1);
-            cout<<str<< endl;
         }
-        if(split.at(0)=="exit"){
+        if (split.at(0) == "exit") {
             string sub = u.getId(split.at(1));
-            string message=string("UNSUBSCRIBE")+'\n'+string("destination:")+split.at(1)+'\n'+string("id:")+sub+'\n'+string("receipt:")+to_string(recjoin)+'\n'+'\0';
-            recjoin=recjoin+2;
-            u.unsubscribe(split.at(1));
-            handle.sendLine(message);
-            string str="Exited club "+split.at(1);
-            cout<<str<< endl;
+            if (sub != "-1") {
+                id++;
+                string message =
+                        string("UNSUBSCRIBE") + '\n' + string("id:") + sub + '\n' + string("receipt:") + to_string(id) +
+                        '\n' + '\n';
+                u.addReceipt(id, "exit", split.at(1));
+                handle.sendLine(message);
+            }
+
         }
         if (split.at(0) == "add") {
             string bookName = "";
-            for (int i = 2; i<split.size();i++){
-                bookName=bookName+split.at(i)+" ";
+            for (unsigned int i = 2; i < split.size(); i++) {
+                bookName = bookName + split.at(i) + " ";
             }
-            bookName=bookName.substr(0,bookName.find_last_of(' '));
-            string message=string("SEND")+'\n'+string("destination:")+split.at(1)+'\n'+u.getName()+string(" has added the book ")+bookName+'\n'+'\0';
-            u.addbook(split.at(2),split.at(1));
+            bookName = bookName.substr(0, bookName.find_last_of(' '));
+            string message = string("SEND") + '\n' + string("destination:") + split.at(1) + '\n' + '\n' + u.getName() +
+                             string(" has added the book ") + bookName + '\n';
+            u.addbook(bookName, split.at(1));
             handle.sendLine(message);
-            string str = u.getName() + string(" ") + string("has added the book ") + split.at(2);
-//            cout <<str<< endl;
         }
-
-        if(split.at(0) == "borrow"){
+        if (split.at(0) == "borrow") {
             string bookName = "";
-            for (int i = 2; i<split.size();i++){
-                bookName=bookName+split.at(i)+" ";
+            for (unsigned int i = 2; i < split.size(); i++) {
+                bookName = bookName + split.at(i) + " ";
             }
-            bookName=bookName.substr(0,bookName.find_last_of(' '));
-            string message=string("SEND")+'\n'+string("destination:")+split.at(1)+'\n'+u.getName()+string(" wish to borrow ")+bookName+'\n'+'\0';
+            bookName = bookName.substr(0, bookName.find_last_of(' '));
+            u.addToWishList(bookName);
+            string message = string("SEND") + '\n' + string("destination:") + split.at(1) + '\n' + '\n' + u.getName() +
+                             string(" wish to borrow ") + bookName + '\n';
             handle.sendLine(message);
         }
-        if(split.at(0) == "return"){
+        if (split.at(0) == "return") {
             string bookName = "";
-            for (int i = 2; i<split.size();i++){
-                bookName=bookName+split.at(i)+" ";
+            for (unsigned int i = 2; i < split.size(); i++) {
+                bookName = bookName + split.at(i) + " ";
             }
-            bookName=bookName.substr(0,bookName.find_last_of(' '));
-            string message=string("SEND")+'\n'+string("destination:")+split.at(1)+'\n'+string(" Returning ")+bookName+string("to ")+u.getBorrowedFrom(split.at(1),split.at(2))+'\n'+'\0';
-            u.deletebook(split.at(2),split.at(1));
+            bookName = bookName.substr(0, bookName.find_last_of(' '));
+            string takeFrom = u.getName();
+            string toReturn = u.getBorrowedFrom(bookName, split.at(1));
+            if (toReturn != "") {
+                u.deletebook(bookName, split.at(1));
+                string message =
+                        string("SEND") + '\n' + string("destination:") + split.at(1) + '\n' + '\n' +
+                        string("Returning ") +
+                        bookName + string(" to ") + toReturn + '\n';
+                handle.sendLine(message);
+            }
+        }
+        if (split.at(0) == "status") {
+            string message =
+                    string("SEND") + '\n' + string("destination:") + split.at(1) + '\n' + '\n' + string("book status") +
+                    '\n';
             handle.sendLine(message);
         }
-        if(split.at(0) == "status"){
-            string message=string("SEND")+'\n'+string("destination:")+split.at(1)+'\n'+string("book status")+'\n'+'\0';
+        if (split.at(0) == "logout") {
+            id++;
+            string message = string("DISCONNECT") + '\n' + string("receipt:") + to_string(id) + '\n' + '\n';
+            u.addReceipt(id, "logout", "");
             handle.sendLine(message);
-        }
-        if(split.at(0) == "logout"){
-            string message=string("DISCONNECT")+'\n'+string("receipt:")+to_string(reclogout)+'\n'+'\0';
-            reclogout=reclogout+2;
-            handle.sendLine(message);
-            login=false;
+            login = false;
         }
     }
 }
 
-vector<string> keyboard::splitline(string line) {
-    vector<string> *linesplit= new vector<string>; // delete
+vector<string> keyboard::splitline(string line, vector<string> &linesplit) {
+
     while (line.size() != 0) {
         string word = line.substr(0, line.find_first_of(' '));
-        linesplit->push_back(word);
+        linesplit.push_back(word);
         int space = line.find_first_of(' ');
-        if (space !=-1){
-            line=line.substr(space+1);
-        }
-        else {
+        if (space != -1) {
+            line = line.substr(space + 1);
+        } else {
             line = "";
         }
     }
-    return *linesplit;
+    return linesplit;
 }
 
